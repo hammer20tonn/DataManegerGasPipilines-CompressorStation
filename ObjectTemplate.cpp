@@ -41,7 +41,6 @@ ObjectTemplate::~ObjectTemplate() {}
 
 
 
-// Реализация TechFunc1
 void ObjectTemplate::TechFunc1(int i) {
     //int DesiredType[5] = {0, 1, 1, 1, 2};
     auto TypeDesireedTypeOut = MainData[i];
@@ -59,8 +58,8 @@ void ObjectTemplate::TechFunc1(int i) {
     }
 }
 
-// Реализация шаблонной функции (должна остаться в заголовке или здесь с explicit instantiation)
-template <typename T> 
+
+template <typename T>
 T ObjectTemplate::InputPos(string NameOfInput, T DesireedTypeIn, int id) {
     cout << NameOfInput << metadata[id];
     cin >> DesireedTypeIn;
@@ -74,12 +73,11 @@ T ObjectTemplate::InputPos(string NameOfInput, T DesireedTypeIn, int id) {
     return DesireedTypeIn;
 }
 
-// Явное инстанцирование шаблона для нужных типов
 template int ObjectTemplate::InputPos<int>(string, int, int);
 template unsigned ObjectTemplate::InputPos<unsigned>(string, unsigned, int);
 template string ObjectTemplate::InputPos<string>(string, string, int);
 
-// Реализация публичных методов
+
 void ObjectTemplate::update() {
     cout << "-----------------" << endl;
     cout << "Enetr this number for change parametr." << endl;
