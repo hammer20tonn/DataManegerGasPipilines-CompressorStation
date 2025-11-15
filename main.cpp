@@ -1,212 +1,392 @@
-#include "ObjectTemplate.h"
-#include <fstream>
 #include <iostream>
-
-
-// Вариант 2: Если структура другая
-#include "cereal/archives/binary.hpp"
-#include "cereal/types/vector.hpp"
-#include "cereal/types/string.hpp"
-#include "cereal/types/variant.hpp"
-
 using namespace std;
-#include <stdio.h>
-#include <stdlib.h>
-#include <map>
+#include <fstream>
 #include <string>
-#include <type_traits>
-
-#include <variant>
+#include <regex>
 #include <vector>
-
-
-#include <cstdio>
-#include <cstdlib>
-
-#include <string>
-
 #include <stdexcept>
+#include <cstdlib>
+#include <limits>
 
 
 
-
-template <typename T>
-T DetectedInput(T& value, int up, int down) {
-    cin >> value;
-    if (cin.fail()) {
-        cin.clear();
-        cout << "input error. Try again." << endl;
-        throw invalid_argument("Invalid argument. Try again.");
-    } else if (up < value || down > value) {
-	cout << "input error. Try again." << endl;
-	throw invalid_argument("Invalid argument. Try again.");
-    }
-    return value;
-}
-
-
-struct FilesData {
-    vector<string> NamesOfFiles;
-
-    template <class Archive>
-    void serialize(Archive& ar) {
-        ar(NamesOfFiles);
+struct Pipeline {
+    string Name;
+    int Length;
+    int Diameters;
+    string State;
+    string titles[4];
+    void display_info() {
+        cout << titles[0] << Name << endl;
+        cout << titles[1] << Length << endl;
+        cout << titles[2] << Diameters << endl;
+        cout << titles[3] << State << endl;
     }
 };
 
+struct CompressedStation {
+    string Name;
+    int LengthFactory;
+    int TypeOfStation;
+};
+
+int CommandCode1;
+int CommandCode2;
+int CommandCode3; // Id
+int CommandCode4;
 
 
-template <typename T>
-void SavePipeLine(const T& pl, const string& filename) {
-    ofstream os(filename, ios::binary);
-    cereal::BinaryOutputArchive archive(os);
-    archive(pl);
-}
+vector<string> vec(4);
+vector<Pipeline> PipeLines;
+Pipeline Reader(int indx, string name, string title[4]) {
+    PipeLines.clear();
+    string text;
+    string line;
+    bool flag = false;
+    string Name;
+    int LengthOfFactory;
+    int Diameters;
+    string OffOn;
+    ifstream in(name);
+    
+    int num = 0;
+    int num1 = 0;
 
-FilesData MainMenu(FilesData NamesOfFilesStructure, string prefix, string parametr[5], string metadata[5], int DesiredType[5]) {
-    vector<string> NamesOfFiles = NamesOfFilesStructure.NamesOfFiles;
-    ObjectTemplate CopiesOfClass[NamesOfFiles.size()];
-    if (NamesOfFiles.size() == 0) {
-        int DesiredNum;
-        cout << "[Exit - Ctrl+C, Create a new - 0]: " << endl;
-    	try {
-    		int DesiredNum = DetectedInput<int>(DesiredNum, 0, 0);
-    	} catch (const exception& e) {
-		return NamesOfFilesStructure;
-    	}
-        if (DesiredNum == 0) {
-	    try {
-            	ObjectTemplate NewPipeLine(parametr, metadata, DesiredType);
-            	NewPipeLine.create();
-	    	      NewPipeLine.PrintData();
-            	string FileName = "Data"+prefix+to_string(NamesOfFiles.size())+".bin";
-            	SavePipeLine(NewPipeLine, FileName);
-            	NamesOfFilesStructure.NamesOfFiles.push_back(FileName);
-            	return NamesOfFilesStructure;
-            } catch (const exception& e) {
-		return NamesOfFilesStructure;
-	    }
-        } else {}
-    }
-    for (int i = 1; i < NamesOfFiles.size()+1; i++) {
-        ObjectTemplate pipeline(parametr, metadata, DesiredType);
-        try {
-            ifstream is(NamesOfFiles[i-1], ios::binary);
-            cereal::BinaryInputArchive archive(is);
-            archive(pipeline);
-        } catch (const exception& e) {
-            cerr << "Error -- " << endl;
-        }
-        CopiesOfClass[i-1] = pipeline;
-        visit([](const auto& value) {
-            cout << value;
-        }, pipeline.MainData[0]);
-        cout << ": " << i << endl;
-    }
-    int DesiredNum;
-    int DesiredNum_;
-    cout << "[Desired number, Exit - Ctrl+C, Create a new - 0]: " << endl;
-    //cin >> DesiredNum;
-    try {
-    	 DesiredNum_ = DetectedInput<int>(DesiredNum, NamesOfFiles.size(), 0);
-    } catch (const exception& e) {
-	     return NamesOfFilesStructure;
-    }
-    if (DesiredNum_ == 0) {
-      try {
-        	ObjectTemplate NewPipeLine(parametr, metadata, DesiredType);
-        	NewPipeLine.create();
-		      NewPipeLine.PrintData();
-        	string FileName = "Data"+prefix+to_string(NamesOfFiles.size())+".bin";
-        	SavePipeLine(NewPipeLine, FileName);
-        	NamesOfFilesStructure.NamesOfFiles.push_back(FileName);
-        	return NamesOfFilesStructure;
-        } catch (const exception& e) {
-		return NamesOfFilesStructure;
-	}
-    } else {
-       DesiredNum_--;
-    }
-    CopiesOfClass[DesiredNum_].PrintData();
-    cout << "[Update - 0, Delete - 1, Pass - 2, Exit - Ctrl+C]: ";
-    int cmnd;
-    int cmnd_;
-    try {
-    	 cmnd_ = DetectedInput<int>(cmnd, 2, 0);
-    } catch (const exception& e) {
-	     return NamesOfFilesStructure;
-    }
-    ObjectTemplate pipeline(parametr, metadata, DesiredType);
-    string FileName = "Data"+prefix+to_string(DesiredNum_)+".bin";
-    switch (cmnd_) {
-        case 0:
-            pipeline = CopiesOfClass[DesiredNum_];
-            pipeline.update();
-            CopiesOfClass[DesiredNum_] = pipeline;
-	          SavePipeLine(pipeline, FileName);
-	          pipeline.PrintData();
-            break;
-        case 1:
-            if( remove( NamesOfFiles[DesiredNum_].c_str() ) != 0 ) {
-                cout << "Uninstallation error, try restarting the program. If the problem persists, please contact technical support." << endl;
-            } else {
-                cout << "Successfully deleted." << endl;
-                NamesOfFilesStructure.NamesOfFiles.erase(NamesOfFilesStructure.NamesOfFiles.begin() + DesiredNum_);
+    
+    if (in.is_open()) {
+        while (getline(in, line)) {
+            if (line == "-------") {
+                if (flag == false) {
+                    flag = true;
+                    num = 0;
+                } else if (flag == true) {
+                    flag = false;
+                    Pipeline PipeLine;
+                    for(int i = 0; i < 4; i++) {
+                        PipeLine.titles[i] = title[i];
+                    }
+                    //PipeLine.titles = title;
+                    PipeLine.Name = vec.at(0);
+                    try {
+                        PipeLine.Length = stoi(vec.at(1));
+                        PipeLine.Diameters = stoi(vec.at(2));
+                    } catch (const exception& e) {
+                        cerr << "Conversion error: " << e.what() << endl;
+                        continue;
+                    }
+                    PipeLine.State = vec.at(3);
+                    PipeLines.push_back(PipeLine);
+                    line = to_string(num1) + ": " + vec.at(0) + "\n";
+                    text = text + line;
+                    num1++;
+                }
+            } else if (flag == true) {
+                if (num < 4) {
+                    vec[num] = line;
+                    num++;
+                }
             }
-            break;
-        default:
-            cout << "";
+        }
     }
-    return NamesOfFilesStructure;
+    in.close();
+    cout << text;
+    return PipeLines[indx];
 }
+
+void Reader_info(string name) {
+    string text;
+    string line;
+    bool flag = false;
+    string Name;
+    int LengthOfFactory;
+    int Diameters;
+    string OffOn;
+    ifstream in(name);
+    
+    vector<string> vec(4);
+    int num = 0;
+    int num1 = 0;
+    
+    if (in.is_open()) {
+        while (getline(in, line)) {
+            if (line == "-------") {
+                if (flag == false) {
+                    flag = true;
+                    num = 0;
+                } else if (flag == true) {
+                    flag = false;
+                    line = to_string(num1) + ": " + vec.at(0) + "\n";
+                    text = text + line;
+                    num1++;
+                }
+            } else if (flag == true) {
+                if (num < 4) {
+                    vec[num] = line;
+                    num++;
+                }
+            }
+        }
+    }
+    in.close();
+    cout << text;
+}
+
+
+
+
+
+
+
+void write(string name) {
+    string outtxt;
+    for (Pipeline unit : PipeLines) {
+        outtxt += "-------\n";
+        outtxt += unit.Name+"\n";
+        outtxt += to_string(unit.Length)+"\n";
+        outtxt += to_string(unit.Diameters)+"\n";
+        outtxt += unit.State+"\n";
+        outtxt += "-------\n";
+    }
+    ofstream file(name);
+    if (file.is_open()) {
+        if (PipeLines.size() == 0) {
+            outtxt += "-------\n";
+            outtxt += "Zero project\n";
+            outtxt += "0\n";
+            outtxt += "0\n";
+            outtxt += "off\n";
+            outtxt += "-------\n";
+        }
+        file << outtxt;
+        file.close();
+    }
+}
+
+
+
+
+
+
+int CoreFunc(string name, string title[]) {
+    while (true) {
+        cout << "[\n 0 - Edit,\n 1 - Create new,\n 2 - Delete,\n 3 - Check info,\n 4 - Main menu,\n 5 - Finished program\n]: ";
+        cin >> CommandCode2;
+        cout << endl;
+        if (cin.fail()) {
+            cin.clear();
+            cin.ignore(10000, '\n');
+            cerr << "Input error." << endl;
+            break;
+        }
+        if (CommandCode2 == 0) {
+            Reader_info(name);
+            cin >> CommandCode3;
+            cout << endl;
+            if (cin.fail()) {
+                cin.clear();
+                cin.ignore(10000, '\n');
+                cerr << "Input error." << endl;
+                break;
+            }
+            Pipeline pipeline = Reader(CommandCode3, name, title);
+            pipeline.display_info();
+
+            if (CommandCode3 == 4) {
+                break;
+            } else if (CommandCode3 == 5) {
+                exit(0);
+            } else {
+                int size_ = PipeLines.size();
+                if (size_ < CommandCode3 || CommandCode3 < 0) {
+                    cerr << "Input error." << endl;
+                    break;
+                }
+            }
+            cout << endl;
+            cout << "[\n 0 - "+title[0]+",\n 1 - "+title[1]+", \n 2 - "+title[2]+",\n 3 - "+title[3]+",\n 4 - Main menu,\n 5 - Finished program\n]: ";
+            cin >> CommandCode4;
+            cout << endl;
+            if (cin.fail()) {
+                cin.clear();
+                cin.ignore(10000, '\n');
+                cerr << "Input error." << endl;
+                break;
+            }
+            if (CommandCode4 == 0) {
+                string Name;
+                cout << title[0] << endl;
+                cin >> Name;
+                if (cin.fail()) {
+                    cin.clear();
+                    cin.ignore(10000, '\n');
+                    cerr << "Input error." << endl;
+                    break;
+                }
+                cout << endl;
+                pipeline.Name = Name;
+            } else if (CommandCode4 == 1) {
+                int Length;
+                cout << title[1] << endl;
+                cin >> Length;
+                if (cin.fail()) {
+                    cin.clear();
+                    cin.ignore(10000, '\n');
+                    cerr << "Input error." << endl;
+                    break;
+                }
+                cout << endl;
+                pipeline.Length = Length;
+            } else if (CommandCode4 == 2) {
+                int Diameter;
+                cout << title[2] << endl;
+                cin >> Diameter;
+                if (cin.fail()) {
+                    cin.clear();
+                    cin.ignore(10000, '\n');
+                    cerr << "Input error." << endl;
+                    break;
+                }
+                cout << endl;
+                pipeline.Diameters = Diameter;
+            }  else if (CommandCode4 == 3) {
+                string State;
+                cout << title[3] << endl;
+                cin >> State;
+                if (cin.fail()) {
+                    cin.clear();
+                    cin.ignore(10000, '\n');
+                    cerr << "Input error." << endl;
+                    break;
+                }
+                cout << endl;
+                pipeline.State = State;
+            } else if (CommandCode4 == 4) {
+                break;
+            } else if (CommandCode4 == 5) {
+                exit(0);
+            } else {
+                cerr << "Input error." << endl;
+                break;
+            }
+            PipeLines[CommandCode3] = pipeline;
+            write(name);
+        } else if(CommandCode2 == 1) {
+            Pipeline pipeline = Reader(0, name, title);
+            string Name;
+            cout << title[0] << endl;
+            cin >> Name;
+            if (cin.fail()) {
+                cin.clear();
+                cin.ignore(10000, '\n');
+                cerr << "Input error." << endl;
+                break;
+            }
+            cout << endl;
+            pipeline.Name = Name;
+            int Length;
+            cout << title[1] << endl;
+            cin >> Length;
+            if (cin.fail()) {
+                cin.clear();
+                cin.ignore(10000, '\n');
+                cerr << "Input error." << endl;
+                break;
+            }
+            cout << endl;
+            pipeline.Length = Length;
+            int Diameter;
+            cout << title[2] << endl;
+            cin >> Diameter;
+            if (cin.fail()) {
+                cin.clear();
+                cin.ignore(10000, '\n');
+                cerr << "Input error." << endl;
+                break;
+            }
+            cout << endl;
+            pipeline.Diameters = Diameter;
+            string State;
+            cout << title[3] << endl;
+            cin >> State;
+            if (cin.fail()) {
+                cin.clear();
+                cin.ignore(10000, '\n');
+                cerr << "Input error." << endl;
+                break;
+            }
+            cout << endl;
+            pipeline.State = State;
+            PipeLines.push_back(pipeline);
+            write(name);
+        } else if(CommandCode2 == 2) {
+            Reader_info(name);
+            cin >> CommandCode3;
+            cout << endl;
+            if (cin.fail()) {
+                cin.clear();
+                cin.ignore(10000, '\n');
+                cerr << "Input error." << endl;
+                break;
+            }
+            Pipeline pipeline = Reader(CommandCode3, name, title);
+            PipeLines.erase(PipeLines.begin() + CommandCode3);
+            write(name);
+            Reader_info(name);
+        } else if(CommandCode2 == 3) {
+            Reader_info(name);
+            cin >> CommandCode3;
+            cout << endl;
+            if (cin.fail()) {
+                cin.clear();
+                cin.ignore(10000, '\n');
+                cerr << "Input error." << endl;
+                break;
+            }
+            Pipeline pipeline = Reader(CommandCode3, name, title);
+            pipeline.display_info();
+            break;
+        } else if (CommandCode2 == 4) {
+            break;
+        } else if (CommandCode2 == 5) {
+            exit(0);
+        } else {
+            cerr << "Input error." << endl;
+            continue;
+        }
+    }
+    return 0;
+}
+
+
+
+
+
 
 
 
 int main() {
-	while (true) {
-		cout << "[Pipelines - 0, Compressed station - 1, Exit - Ctrl+C]: " << endl;
-		int StatusCode;
-        string parametr[5];
-        string metadata[5];
-        int DesiredType[5];
-        string parametr0[5] = {"Name: ", "Length: ", "Diameter: ", "Works normally: ", "Age: "};
-        string metadata0[5] = {"", "", "", "(0 - false, 1 - true) ", ""};
-        int DesiredType0[5] = {0, 1, 1, 1, 2};
-        string parametr1[5] = {"Name: ", "Length: ", "Diameter: ", "Works normally: ", "Age: "};
-        string metadata1[5] = {"", "", "", "(0 - false, 1 - true) ", ""};
-        int DesiredType1[5] = {0, 1, 1, 1, 2};
-		try {
-      int StatusCode = DetectedInput<int>(StatusCode, 1, 0);
-			string prefix;
-			if (StatusCode == 0) {
-				prefix = "Pipelines";
-                for (int i = 0; i < 5; ++i) {
-                    parametr[i] = parametr0[i];
-                    metadata[i] = metadata0[i];
-                    DesiredType[i] = DesiredType0[i];
-                }
-			} else if(StatusCode == 1) {
-				prefix = "PipeCompressedStation";
-                for (int i = 0; i < 5; ++i) {
-                    parametr[i] = parametr1[i];
-                    metadata[i] = metadata1[i];
-                    DesiredType[i] = DesiredType1[i];
-                }
-			} else {
-				cout << "input error. Try again." << endl;
-				continue;
-			}
-			string FileName = "Data"+prefix+".bin";
-			FilesData Data;
-			{
-        			std::ifstream is(FileName, std::ios::binary);
-        			cereal::BinaryInputArchive input_archive(is);
-        			input_archive(Data);
-			}
-			Data = MainMenu(Data, prefix, parametr, metadata, DesiredType);
-			SavePipeLine(Data, FileName);
-    		} catch (const exception& e) {
-			cout << "input error. Try again." << endl;
-    		}
-	}
+    while (true) {
+        cin.clear();
+        cout << "[0 - Pipeline, 1 - Compressed station, 2 - Finished program]: ";
+        cin >> CommandCode1;
+        cout << endl;
+        if (cin.fail()) {
+            cin.clear();
+            cin.ignore(10000, '\n');
+            cerr << "Input error." << endl;
+            continue;
+        }
+        if (CommandCode1 == 0) {
+            string arr[4] = {"Name: ", "Length: ", "Diameters: ", "State: "};
+            CoreFunc("Pipelines.txt", arr);
+        } else if(CommandCode1 == 1) {
+            string arr[4] = {"Name: ", "Length: ", "Length of work: ", "Type: "};
+            CoreFunc("CompressedStation.txt", arr);
+        } else if(CommandCode1 == 2) {
+            exit(0);
+        } else {
+            cerr << "Input error." << endl;
+        }
+    }
+    return 0;
 }
