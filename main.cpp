@@ -34,7 +34,7 @@ int CommandCode1;
 int CommandCode2;
 int CommandCode3; // Id
 int CommandCode4;
-
+int CinSpecial;
 
 vector<string> vec(4);
 vector<Pipeline> PipeLines;
@@ -166,26 +166,33 @@ void write(string name) {
 
 
 
+int CinFunc() {
+    if (cin.fail()) {
+        cin.clear();
+        cin.ignore(10000, '\n');
+        cerr << "Input error." << endl;
+        return 1;
+    }
+    return 0;
+}
+
+
 
 int CoreFunc(string name, string title[]) {
     while (true) {
         cout << "[\n 0 - Edit,\n 1 - Create new,\n 2 - Delete,\n 3 - Check info,\n 4 - Main menu,\n 5 - Finished program\n]: ";
         cin >> CommandCode2;
         cout << endl;
-        if (cin.fail()) {
-            cin.clear();
-            cin.ignore(10000, '\n');
-            cerr << "Input error." << endl;
+        CinSpecial = CinFunc();
+        if (CinSpecial == 1) {
             break;
         }
         if (CommandCode2 == 0) {
             Reader_info(name);
             cin >> CommandCode3;
             cout << endl;
-            if (cin.fail()) {
-                cin.clear();
-                cin.ignore(10000, '\n');
-                cerr << "Input error." << endl;
+            CinSpecial = CinFunc();
+            if (CinSpecial == 1) {
                 break;
             }
             Pipeline pipeline = Reader(CommandCode3, name, title);
@@ -206,20 +213,16 @@ int CoreFunc(string name, string title[]) {
             cout << "[\n 0 - "+title[0]+",\n 1 - "+title[1]+", \n 2 - "+title[2]+",\n 3 - "+title[3]+",\n 4 - Main menu,\n 5 - Finished program\n]: ";
             cin >> CommandCode4;
             cout << endl;
-            if (cin.fail()) {
-                cin.clear();
-                cin.ignore(10000, '\n');
-                cerr << "Input error." << endl;
+            CinSpecial = CinFunc();
+            if (CinSpecial == 1) {
                 break;
             }
             if (CommandCode4 == 0) {
                 string Name;
                 cout << title[0] << endl;
                 cin >> Name;
-                if (cin.fail()) {
-                    cin.clear();
-                    cin.ignore(10000, '\n');
-                    cerr << "Input error." << endl;
+                CinSpecial = CinFunc();
+                if (CinSpecial == 1) {
                     break;
                 }
                 cout << endl;
@@ -228,10 +231,8 @@ int CoreFunc(string name, string title[]) {
                 int Length;
                 cout << title[1] << endl;
                 cin >> Length;
-                if (cin.fail()) {
-                    cin.clear();
-                    cin.ignore(10000, '\n');
-                    cerr << "Input error." << endl;
+                CinSpecial = CinFunc();
+                if (CinSpecial == 1) {
                     break;
                 }
                 cout << endl;
@@ -240,10 +241,8 @@ int CoreFunc(string name, string title[]) {
                 int Diameter;
                 cout << title[2] << endl;
                 cin >> Diameter;
-                if (cin.fail()) {
-                    cin.clear();
-                    cin.ignore(10000, '\n');
-                    cerr << "Input error." << endl;
+                CinSpecial = CinFunc();
+                if (CinSpecial == 1) {
                     break;
                 }
                 cout << endl;
@@ -252,10 +251,8 @@ int CoreFunc(string name, string title[]) {
                 string State;
                 cout << title[3] << endl;
                 cin >> State;
-                if (cin.fail()) {
-                    cin.clear();
-                    cin.ignore(10000, '\n');
-                    cerr << "Input error." << endl;
+                CinSpecial = CinFunc();
+                if (CinSpecial == 1) {
                     break;
                 }
                 cout << endl;
@@ -275,10 +272,8 @@ int CoreFunc(string name, string title[]) {
             string Name;
             cout << title[0] << endl;
             cin >> Name;
-            if (cin.fail()) {
-                cin.clear();
-                cin.ignore(10000, '\n');
-                cerr << "Input error." << endl;
+            CinSpecial = CinFunc();
+            if (CinSpecial == 1) {
                 break;
             }
             cout << endl;
@@ -286,10 +281,8 @@ int CoreFunc(string name, string title[]) {
             int Length;
             cout << title[1] << endl;
             cin >> Length;
-            if (cin.fail()) {
-                cin.clear();
-                cin.ignore(10000, '\n');
-                cerr << "Input error." << endl;
+            CinSpecial = CinFunc();
+            if (CinSpecial == 1) {
                 break;
             }
             cout << endl;
@@ -297,10 +290,8 @@ int CoreFunc(string name, string title[]) {
             int Diameter;
             cout << title[2] << endl;
             cin >> Diameter;
-            if (cin.fail()) {
-                cin.clear();
-                cin.ignore(10000, '\n');
-                cerr << "Input error." << endl;
+            CinSpecial = CinFunc();
+            if (CinSpecial == 1) {
                 break;
             }
             cout << endl;
@@ -308,10 +299,8 @@ int CoreFunc(string name, string title[]) {
             string State;
             cout << title[3] << endl;
             cin >> State;
-            if (cin.fail()) {
-                cin.clear();
-                cin.ignore(10000, '\n');
-                cerr << "Input error." << endl;
+            CinSpecial = CinFunc();
+            if (CinSpecial == 1) {
                 break;
             }
             cout << endl;
@@ -322,10 +311,8 @@ int CoreFunc(string name, string title[]) {
             Reader_info(name);
             cin >> CommandCode3;
             cout << endl;
-            if (cin.fail()) {
-                cin.clear();
-                cin.ignore(10000, '\n');
-                cerr << "Input error." << endl;
+            CinSpecial = CinFunc();
+            if (CinSpecial == 1) {
                 break;
             }
             Pipeline pipeline = Reader(CommandCode3, name, title);
@@ -336,10 +323,8 @@ int CoreFunc(string name, string title[]) {
             Reader_info(name);
             cin >> CommandCode3;
             cout << endl;
-            if (cin.fail()) {
-                cin.clear();
-                cin.ignore(10000, '\n');
-                cerr << "Input error." << endl;
+            CinSpecial = CinFunc();
+            if (CinSpecial == 1) {
                 break;
             }
             Pipeline pipeline = Reader(CommandCode3, name, title);
@@ -370,11 +355,9 @@ int main() {
         cout << "[0 - Pipeline, 1 - Compressed station, 2 - Finished program]: ";
         cin >> CommandCode1;
         cout << endl;
-        if (cin.fail()) {
-            cin.clear();
-            cin.ignore(10000, '\n');
-            cerr << "Input error." << endl;
-            continue;
+        CinSpecial = CinFunc();
+        if (CinSpecial == 1) {
+            break;
         }
         if (CommandCode1 == 0) {
             string arr[4] = {"Name: ", "Length: ", "Diameters: ", "State: "};
