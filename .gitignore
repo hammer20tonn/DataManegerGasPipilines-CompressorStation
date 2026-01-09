@@ -1,9 +1,0 @@
-cereal/
-main.exe
-PipeLine.o
-main.o
-.vscode/
-arch/PipesData.bin
-ObjectTemplate.o
-DataPipeLines0.bin
-DataPipeLines1.bin
