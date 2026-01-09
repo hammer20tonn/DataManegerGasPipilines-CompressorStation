@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{b73c0956-6b40-4fae-93f8-cf4d4b7b71a9}</ProjectGuid>
-    <RootNamespace>ConsoleApplication6</RootNamespace>
+    <ProjectGuid>{5498ab18-49e2-4bfa-a1ed-84f5f48e6903}</ProjectGuid>
+    <RootNamespace>LR2GribkovKirill</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -127,7 +127,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ConsoleApplication6.cpp" />
+    <ClCompile Include="Compressedstation.cpp" />
+    <ClCompile Include="LR2_GribkovKirill.cpp" />
+    <ClCompile Include="Mainthread.cpp" />
+    <ClCompile Include="Pipeline.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Compressedstation.h" />
+    <ClInclude Include="Mainthread.h" />
+    <ClInclude Include="Pipeline.h" />
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
