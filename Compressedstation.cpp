@@ -35,28 +35,10 @@ int Compressedstation::getClassStation() const {
 }
 
 
-/**
-void Compressedstation::setName(string name_) {
-	name = name_;
-}
-void Compressedstation::setId(int id_) {
-	id = id_;
-}
-void Compressedstation::setLengthOfWorkshop(int LengthOfWorkshop_) {
-	LengthOfWorkshop = LengthOfWorkshop_;
-}
-**/
-void Compressedstation::setLengthOfStableWorkshop(int LengthOfStableWorkshop_) {
-	LengthOfStableWorkshop = LengthOfStableWorkshop_;
-}
-/**
-void Compressedstation::setClassStation(int ClassStation_) {
-	ClassStation = ClassStation_;
-}**/
+
 void Compressedstation::load(ifstream& fin) {
 	fin.ignore(numeric_limits<streamsize>::max(), '\n');
 	getline(fin, name);
-	//fin >> name;
 	fin >> LengthOfWorkshop;
 	fin >> LengthOfStableWorkshop;
 	fin >> ClassStation;
@@ -65,10 +47,25 @@ void Compressedstation::load(ifstream& fin) {
 
 
 
+void Compressedstation::save(ofstream& fout) const {
+	fout << name << endl << LengthOfWorkshop << endl << LengthOfStableWorkshop << endl << ClassStation << endl;
+}
 
 
-
-
+void Compressedstation::editLengthOfStableWorkshop(int command) {
+	if ((LengthOfStableWorkshop + 1 > LengthOfWorkshop && command == 1) || (LengthOfStableWorkshop - 1 < 0 && command == 0)) {
+		cerr << "The number of operating workshops exceeds the total number." << endl;
+		return;
+	}
+	if (command == 0) {
+		LengthOfStableWorkshop -= 1;
+	} else if (command == 1) {
+		LengthOfStableWorkshop += 1;
+	}
+	else {
+		cerr << "System error" << endl;
+	}
+}
 
 
 

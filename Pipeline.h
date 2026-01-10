@@ -17,13 +17,11 @@ public:
 	int getDiameter() const;
 
 
-
-	//void setId(int id_);
 	void setName(std::string& name_);
 	void setLength(int length_);
 
-	//void setDiameter(int diameter_);
 	void load(std::ifstream& fin);
+	void save(std::ofstream& fout) const;
 
 
 	Pipeline();

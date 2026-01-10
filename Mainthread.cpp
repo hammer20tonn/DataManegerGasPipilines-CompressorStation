@@ -29,14 +29,6 @@ Mainthread::Mainthread() {
 	set<Compressedstation> Compressedstations;
 }
 
-void Mainthread::EditPipeline(Pipeline& s, int num)
-{
-	s.repair = num;
-}
-
-
-
-
 
 void Mainthread::PipelineMenu()
 {
@@ -67,7 +59,7 @@ void Mainthread::PipelineMenu()
 		case 2: {
 			cout << "['true' - 1, 'false' - 0]: ";
 			command = GetCorrectNumber(0, 1);
-			EditPipeline(Select<Pipeline>(Pipelines), command); // Edit
+			Select<Pipeline>(Pipelines).repair = command; // Edit
 			break;
 		}
 		case 3: {
@@ -151,23 +143,6 @@ void Mainthread::PipelineMenu()
 
 
 
-void Mainthread::EditCompressedstation(Compressedstation& s, int num)
-{
-	int LengthOfStableWorkshop = s.getLengthOfStableWorkshop();
-	if (LengthOfStableWorkshop + 1 > s.getLengthOfWorkshop() || LengthOfStableWorkshop - 1 < 0) {
-		cout << "The number of operating workshops exceeds the total number." << endl;
-		return;
-	}
-	//s.LengthOfStableWorkshop += (num == 1) ? 1 : -1;
-	int num_ = (num == 1) ? 1 : -1;
-	s.setLengthOfStableWorkshop(LengthOfStableWorkshop + num_);
-}
-
-
-
-
-
-
 
 
 
@@ -185,8 +160,8 @@ void Mainthread::editCompressedstation(vector<reference_wrapper<Compressedstatio
 		}
 		return;
 	}
-	for (auto& ref : CompressedstationMask) {
-		EditCompressedstation(ref, num);
+	for (reference_wrapper<Compressedstation>& ref : CompressedstationMask) {
+		ref.get().editLengthOfStableWorkshop(num);
 	}
 }
 
@@ -208,8 +183,8 @@ void Mainthread::editPipeline(vector<reference_wrapper<Pipeline>>& PipelineMask)
 		}
 		return;
 	}
-	for (auto& ref : PipelineMask) {
-		EditPipeline(ref, num);
+	for (reference_wrapper<Pipeline>& ref : PipelineMask) {
+		ref.get().repair = num;
 	}
 }
 
@@ -246,7 +221,7 @@ void Mainthread::CompressedstationMenu()
 		case 2: {
 			cout << "['+1' - 1, '-1' - 0]: ";
 			command = GetCorrectNumber(0, 1);
-			EditCompressedstation(Select<Compressedstation>(Compressedstations), command); // Edit
+			Select<Compressedstation>(Compressedstations).editLengthOfStableWorkshop(num);
 			break;
 		}
 		case 3: {
@@ -334,21 +309,6 @@ Pipeline Mainthread::LoadPipeline(ifstream& fin)
 {
 	Pipeline s;
 	s.load(fin);
-	/*string name;
-	int length;
-	int diameter;
-	fin >> name;
-	fin >> length;
-	fin >> diameter;
-	fin >> s.repair;
-	fin >> s.name;
-	fin >> s.length;
-	fin >> s.diameter;
-	s.setName(name);
-	s.setLength(length);
-	s.setDiameter(diameter);*/
-
-
 	return s;
 }
 
@@ -356,39 +316,18 @@ Compressedstation Mainthread::LoadCompressedstation(ifstream& fin)
 {
 	Compressedstation s;
 	s.load(fin);
-	/**
-	string name;
-	int LengthOfWorkshop;
-	int LengthOfStableWorkshop;
-	int ClassStation;
-	fin >> name;
-	fin >> LengthOfWorkshop;
-	fin >> LengthOfStableWorkshop;
-	fin >> ClassStation;
-	s.setName(name);
-	s.setLengthOfWorkshop(LengthOfWorkshop);
-	s.setLengthOfStableWorkshop(LengthOfStableWorkshop);
-	s.setClassStation(ClassStation);
-	
-	fin >> s.name;
-	fin >> s.LengthOfWorkshop;
-	fin >> s.LengthOfStableWorkshop;
-	fin >> s.ClassStation;
-	**/
 	return s;
 }
 
 
 void Mainthread::SavePipeline(ofstream& fout, const Pipeline& s)
 {
-	fout << s.getName() << endl << s.getLength() << endl << s.getDiameter() << endl << s.repair << endl;
-	//fout << s.name << endl << s.length << endl << s.diameter << endl << s.repair << endl;
+	s.save(fout);
 }
 
 void Mainthread::SaveCompressedstation(ofstream& fout, const Compressedstation& s)
 {
-	fout << s.getName() << endl << s.getLengthOfWorkshop() << endl << s.getLengthOfStableWorkshop() << endl << s.getClassStation() << endl;
-	//fout << s.name << endl << s.LengthOfWorkshop << endl << s.LengthOfStableWorkshop << endl << s.ClassStation << endl;
+	s.save(fout);
 }
 
 

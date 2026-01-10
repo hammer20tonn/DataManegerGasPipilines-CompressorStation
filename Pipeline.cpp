@@ -36,16 +36,12 @@ int Pipeline::getDiameter() const {
 void Pipeline::load(ifstream& fin) {
 	fin.ignore(numeric_limits<streamsize>::max(), '\n');
 	getline(fin, name);
-	//fin >> name;
 	fin >> length;
 	fin >> diameter;
 	fin >> repair;
 }
 
-/*
-void Pipeline::setId(int id_) {
-	id = id_;
-}*/
+
 void Pipeline::setName(std::string& name_) {
 	name = name_;
 }
@@ -53,11 +49,14 @@ void Pipeline::setName(std::string& name_) {
 void Pipeline::setLength(int length_) {
 	length = length_;
 }
-/*
-void Pipeline::setDiameter(int diameter_) {
-	diameter = diameter_;
+
+
+void Pipeline::save(ofstream& fout) const {
+	fout << name << endl << length << endl << diameter << endl << repair << endl;
 }
-*/
+
+
+
 
 
 
@@ -65,20 +64,11 @@ void Pipeline::setDiameter(int diameter_) {
 
 ostream& operator << (ostream& out, const Pipeline& s)
 {
-	/**PRINT_PARAM(cout, s.getId());
-	PRINT_PARAM(cout, s.getName());
-	PRINT_PARAM(cout, s.getLength());
-	PRINT_PARAM(cout, s.getDiameter());
-	PRINT_PARAM(cout, s.repair);**/
 	PRINT_PARAM(cout, s.id);
 	PRINT_PARAM(cout, s.name);
 	PRINT_PARAM(cout, s.length);
 	PRINT_PARAM(cout, s.diameter);
 	PRINT_PARAM(cout, s.repair);
-	//out << "MaxID: " << Student::MaxID
-	//	<< " Id: " << s.id
-	//	<< " Name: " << s.name
-	//	<< "\tScore: " << s.score << endl;
 	return out;
 }
 istream& operator >> (istream& in, Pipeline& s)

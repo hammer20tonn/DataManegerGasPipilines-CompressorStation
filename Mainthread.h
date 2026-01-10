@@ -17,7 +17,6 @@
 class Mainthread
 {
 private:
-	void EditPipeline(Pipeline& s, int num);
 
 	void EditCompressedstation(Compressedstation& s, int num);
 
@@ -40,10 +39,6 @@ public:
 };
 
 
-/**
-template<typename ObjectType, typename ParamType>
-using Filter = bool(*)(const ObjectType&, ParamType);
-**/
 
 template<typename T>
 bool CheckByName(const T& obj, const std::string& param) {

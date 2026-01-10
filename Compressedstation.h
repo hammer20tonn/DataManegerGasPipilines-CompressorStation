@@ -18,13 +18,15 @@ public:
 	int getId() const;
 	int getClassStation() const;
 
-	//void setName(std::string name_);
-	//void setLengthOfWorkshop(int LengthOfWorkshop_);
-	void setLengthOfStableWorkshop(int LengthOfStableWorkshop_);
-	//void setId(int id_);
-	//void setClassStation(int ClassStation_);
 
 	void load(std::ifstream& fin);
+	void save(std::ofstream& fout) const;
+
+
+	void editLengthOfStableWorkshop(int command); // 1 - +1, 0 - -1
+
+
+
 	Compressedstation();
 	bool operator<(const Compressedstation& other) const {
 		return id < other.id;
