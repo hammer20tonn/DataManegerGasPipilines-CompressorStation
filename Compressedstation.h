@@ -8,9 +8,9 @@ private:
 	static int MaxID;
 	std::string name;
 	int LengthOfWorkshop;
-	int LengthOfStableWorkshop;
 	int ClassStation;
 	int id;
+	int LengthOfStableWorkshop;
 public:
 	std::string getName() const;
 	int getLengthOfWorkshop() const;
@@ -26,6 +26,7 @@ public:
 	void editLengthOfStableWorkshop(int command); // 1 - +1, 0 - -1
 
 
+	static void SearchMaxId(std::set<Compressedstation>& s);
 
 	Compressedstation();
 	bool operator<(const Compressedstation& other) const {

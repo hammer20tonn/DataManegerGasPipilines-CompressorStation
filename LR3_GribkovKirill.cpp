@@ -37,11 +37,12 @@ int main()
 	while (1) {
 		cout << "1. Pipeline menu" << endl
 			<< "2. Compressed station menu" << endl
-			<< "3. Save to file" << endl
-			<< "4. Load from file" << endl
+			<< "3. Gas transmission network menu" << endl // gtn
+			<< "4. Save to file" << endl
+			<< "5. Load from file" << endl
 			<< "0. Exit" << endl
 			<< "Choose action: ";
-		switch (GetCorrectNumber(0, 4))
+		switch (GetCorrectNumber(0, 5))
 		{
 			case 1: { // Pipelines
 				mainthread.PipelineMenu();
@@ -52,10 +53,14 @@ int main()
 				break;
 			}
 			case 3: {
-				mainthread.saveFunction();
+				mainthread.gtnMenu();
 				break;
 			}
 			case 4: {
+				mainthread.saveFunction();
+				break;
+			}
+			case 5: {
 				mainthread.loadFunction();
 				break;
 			}

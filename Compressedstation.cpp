@@ -1,7 +1,7 @@
 #include "Compressedstation.h"
 
-#include <fstream>
 
+#include <fstream>
 
 #include "utils.h"
 using namespace std;
@@ -16,6 +16,15 @@ Compressedstation::Compressedstation()
 	LengthOfStableWorkshop = 0; // количество работающих цехов
 	ClassStation = 0;
 }
+
+
+void Compressedstation::SearchMaxId(std::set<Compressedstation>& s) {
+	if (!s.empty()) {
+		MaxID = (s.rbegin()->getId())+1;
+	}
+}
+
+
 
 
 string Compressedstation::getName() const {
@@ -34,8 +43,6 @@ int Compressedstation::getClassStation() const {
 	return ClassStation;
 }
 
-
-
 void Compressedstation::load(ifstream& fin) {
 	fin.ignore(numeric_limits<streamsize>::max(), '\n');
 	getline(fin, name);
@@ -44,13 +51,9 @@ void Compressedstation::load(ifstream& fin) {
 	fin >> ClassStation;
 }
 
-
-
-
 void Compressedstation::save(ofstream& fout) const {
 	fout << name << endl << LengthOfWorkshop << endl << LengthOfStableWorkshop << endl << ClassStation << endl;
 }
-
 
 void Compressedstation::editLengthOfStableWorkshop(int command) {
 	if ((LengthOfStableWorkshop + 1 > LengthOfWorkshop && command == 1) || (LengthOfStableWorkshop - 1 < 0 && command == 0)) {
@@ -59,13 +62,20 @@ void Compressedstation::editLengthOfStableWorkshop(int command) {
 	}
 	if (command == 0) {
 		LengthOfStableWorkshop -= 1;
-	} else if (command == 1) {
+	}
+	else if (command == 1) {
 		LengthOfStableWorkshop += 1;
 	}
 	else {
 		cerr << "System error" << endl;
 	}
 }
+
+
+
+
+
+
 
 
 

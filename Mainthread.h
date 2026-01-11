@@ -10,15 +10,16 @@
 #include <algorithm>
 #include <stdexcept>
 #include "utils.h"
-
+#include "gtn.h"
+#include <unordered_map>
+#include <type_traits>
+#include <functional>
 
 
 
 class Mainthread
 {
 private:
-
-	void EditCompressedstation(Compressedstation& s, int num);
 
 	Pipeline LoadPipeline(std::ifstream& fin);
 	Compressedstation LoadCompressedstation(std::ifstream& fin);
@@ -27,15 +28,19 @@ private:
 public:
 	std::set<Pipeline> Pipelines;
 	std::set<Compressedstation> Compressedstations;
+	gtn my_gtn;
+
 	Mainthread();
 
 	void PipelineMenu();
 	void CompressedstationMenu();
+	void gtnMenu();
 
 	void saveFunction();
 	void loadFunction();
 	void editCompressedstation(std::vector<std::reference_wrapper<Compressedstation>>& CompressedstationMask);
 	void editPipeline(std::vector<std::reference_wrapper<Pipeline>>& PipelineMask);
+
 };
 
 
@@ -48,6 +53,11 @@ bool CheckByName(const T& obj, const std::string& param) {
 template<typename T>
 bool CheckByRepair(const T& obj, const int& param) {
 	return obj.repair == param;
+}
+
+template<typename T>
+bool CheckByDiametr(const T& obj, const int& param) {
+	return obj.getDiameter() == param;
 }
 
 template<typename T>
@@ -77,6 +87,13 @@ bool CheckByPercentage(const T& obj, const int& param) {
 
 
 
+
+
+
+
+
+
+
 template<typename Container, typename FilterFunc, typename Param>
 auto FindByFilter(const Container& group, FilterFunc f, Param param) {
 	using ElementType = typename Container::value_type;
@@ -90,43 +107,51 @@ auto FindByFilter(const Container& group, FilterFunc f, Param param) {
 	return res;
 }
 
-
-
-
-template<typename T>
-T& Select(std::set<T>& g, uint64_t criticalnum = 9999)
+template<typename T, template<typename> class Container>
+T& Select(Container<T>& g, uint64_t criticalnum = 9999)
 {
-
 	if (g.empty()) {
-		throw std::runtime_error("No pipelines available");
+		throw std::runtime_error("No pipelines or compression station available");
 	}
 
 	std::vector<uint64_t> allowed;
 	for (const T& i : g) {
-		allowed.push_back(static_cast<uint64_t>(i.getId()));
+		if constexpr (std::is_pointer_v<T>) {
+			allowed.push_back(static_cast<uint64_t>(i->getId()));
+		}
+		else {
+			allowed.push_back(static_cast<uint64_t>(i.getId()));
+		}
 	}
 
-
-
-
-
-	allowed.push_back(criticalnum);
 	if (criticalnum == 9999) {
 		std::cout << "Type id: ";
 	}
 	else {
+		allowed.push_back(criticalnum);
 		std::cout << "[stop - " + std::to_string(criticalnum) + "]: ";
 	}
+
 	uint64_t num = GetCorrectNumberAllowed(allowed);
 
 	if (num == criticalnum) {
 		throw std::runtime_error("Stop selected");
 	}
 
-	auto it = std::find_if(g.begin(), g.end(),
-		[num](const T& station) {
-			return static_cast<uint64_t>(station.getId()) == num;
-		});
+	decltype(g.begin()) it;
+
+	if constexpr (std::is_pointer_v<T>) {
+		it = std::find_if(g.begin(), g.end(),
+			[num](const T& station) {
+				return static_cast<uint64_t>(station->getId()) == num;
+			});
+	}
+	else {
+		it = std::find_if(g.begin(), g.end(),
+			[num](const T& station) {
+				return static_cast<uint64_t>(station.getId()) == num;
+			});
+	}
 
 	if (it != g.end()) {
 		return const_cast<T&>(*it);
@@ -137,17 +162,21 @@ T& Select(std::set<T>& g, uint64_t criticalnum = 9999)
 
 
 
-
-template<typename T>
-uint64_t GetMax(std::set<T>& g)
+template<typename T, template<typename> class Container>
+uint64_t GetMax(const Container<T>& g)
 {
 	if (g.empty()) {
-		throw std::runtime_error("No pipelines available");
+		throw std::runtime_error("No pipelines or compression station available");
 	}
 
 	std::vector<uint64_t> allowed;
 	for (const T& i : g) {
-		allowed.push_back(static_cast<uint64_t>(i.getId()));
+		if constexpr (std::is_pointer_v<T>) {
+			allowed.push_back(static_cast<uint64_t>(i->getId()));
+		}
+		else {
+			allowed.push_back(static_cast<uint64_t>(i.getId()));
+		}
 	}
 
 	uint64_t max_it = *max_element(allowed.begin(), allowed.end());

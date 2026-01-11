@@ -3,9 +3,9 @@
 #include <vector>
 #include <set>
 #include <algorithm>
-//#define INPUT_LINE(in, str) getline(in>>std::ws, str); \
+#define INPUT_LINE(in, str) getline(in>>std::ws, str); \
 						std::cerr << str << std::endl
-#define INPUT_LINE(in, str) getline(in>>std::ws, str);
+//#define INPUT_LINE(in, str) getline(in>>std::ws, str);
 
 #define PRINT_PARAM(out, x) out<< #x << "=" << x << std::endl
 
@@ -59,11 +59,14 @@ T GetCorrectNumberAllowed(const std::vector<T>& allowed_values) {
 		std::find(allowed_values.begin(), allowed_values.end(), x) == allowed_values.end()) {
 		std::cin.clear();
 		std::cin.ignore(10000, '\n');
-		std::cout << "Type one of: ";
-		for (const auto& val : allowed_values) {
-			std::cout << val << " ";
+		std::cout << "[";
+		for (size_t i = 0; i < allowed_values.size() - 1; ++i) {
+			std::cout << allowed_values[i] << ", ";
 		}
-		std::cout << ": ";
+		if (!allowed_values.empty()) {
+			std::cout << allowed_values.back();
+		}
+		std::cout << "]: ";
 	}
 	return x;
 }

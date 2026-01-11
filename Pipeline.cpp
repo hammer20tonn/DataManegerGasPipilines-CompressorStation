@@ -1,6 +1,6 @@
  #include "Pipeline.h"
 
-#include <fstream>
+
 #include <vector>
 
 #include "utils.h"
@@ -15,7 +15,29 @@ Pipeline::Pipeline()
 	length = 0;
 	diameter = 0;
 	repair = false;
+	cs1 = 0;
+	cs2 = 0;
+	InGTN = false;
 }
+
+void Pipeline::SearchMaxId(set<Pipeline>& s) {
+	if (!s.empty()) {
+		MaxID = (s.rbegin()->getId())+1;
+	}
+}
+
+
+
+void Pipeline::resetGTN() const {
+	InGTN = false;
+	cs1 = 0;
+	cs2 = 0;
+}
+
+void Pipeline::setMaxId(int maxid) {
+	MaxID = maxid;
+}
+
 
 int Pipeline::getId() const {
 	return id;
@@ -33,28 +55,29 @@ int Pipeline::getDiameter() const {
 	return diameter;
 }
 
+
+
+
 void Pipeline::load(ifstream& fin) {
 	fin.ignore(numeric_limits<streamsize>::max(), '\n');
 	getline(fin, name);
 	fin >> length;
 	fin >> diameter;
 	fin >> repair;
+	fin >> cs1;
+	fin >> cs2;
+	fin >> InGTN;
+	fin >> id;
 }
 
 
-void Pipeline::setName(std::string& name_) {
-	name = name_;
-}
 
-void Pipeline::setLength(int length_) {
-	length = length_;
-}
+
 
 
 void Pipeline::save(ofstream& fout) const {
 	fout << name << endl << length << endl << diameter << endl << repair << endl;
 }
-
 
 
 
@@ -73,12 +96,13 @@ ostream& operator << (ostream& out, const Pipeline& s)
 }
 istream& operator >> (istream& in, Pipeline& s)
 {
+	std::vector<int> diameters = { 500, 700, 1000, 1400 };
 	cout << "Type name: ";
 	INPUT_LINE(in, s.name);
 	cout << "Type length: ";
 	s.length = GetCorrectNumber(0, 1500);
-	cout << "Type diameter: ";
-	s.diameter = GetCorrectNumber(0, 1400);
+	cout << "Type diameter [500, 700, 1000, 1400]: ";
+	s.diameter = GetCorrectNumberAllowed(diameters);
 	cout << "Type class repair: ";
 	s.repair = GetCorrectNumber(0, 1);
 	return in;
