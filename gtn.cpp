@@ -6,6 +6,7 @@
 #include <algorithm>
 
 #include <vector>
+#include <queue>
 
 #include "utils.h"
 using namespace std;
@@ -25,35 +26,43 @@ gtn::gtn(set<Pipeline>& pl, set<Compressedstation>& cs) : Pipelines(pl), Compres
 
 
 
-void gtn::topologicalSortDFS(int u, vector<vector<int>>& adj, vector<bool>& visited, stack<int>& st) {
-	visited[u] = true;
+vector<int> gtn::topologicalSortKahn(int V, vector<vector<int>>& adj) {
+	vector<int> inDegree(V, 0);
 
-	for (int v : adj[u]) {
-		if (!visited[v]) {
-			topologicalSortDFS(v, adj, visited, st);
+	for (int u = 0; u < V; u++) {
+		for (int v : adj[u]) {
+			inDegree[v]++;
 		}
 	}
 
-	st.push(u);
-}
-
-vector<int> gtn::topologicalSort(int V, vector<vector<int>>& adj) {
-	stack<int> st;
-	vector<bool> visited(V, false);
-
-	for (int i = 0; i < V; ++i) {
-		if (!visited[i]) {
-			topologicalSortDFS(i, adj, visited, st);
-		}
+	queue<int> q;
+	for (int i = 0; i < V; i++) {
+		if (inDegree[i] == 0) q.push(i);
 	}
 
 	vector<int> result;
-	while (!st.empty()) {
-		result.push_back(st.top());
-		st.pop();
+
+	while (!q.empty()) {
+		int u = q.front();
+		q.pop();
+		result.push_back(u);
+
+		for (int v : adj[u]) {
+			inDegree[v]--;
+			if (inDegree[v] == 0) {
+				q.push(v);
+			}
+		}
 	}
+
 	return result;
 }
+
+
+
+
+
+
 
 void gtn::getTopologicalSort() {
 	if (Connections.empty()) {
@@ -63,23 +72,37 @@ void gtn::getTopologicalSort() {
 
 	set<int> s;
 	for (Connection& i : Connections) {
-		s.insert(i.cs1.getId());
-		s.insert(i.cs2.getId());
+		s.insert(i.cs1.id);
+		s.insert(i.cs2.id);
 	}
-	int V = s.size();
+	size_t V = s.size();
 	vector<vector<int>> adj(V);
 	for (Connection& i : Connections) {
-		adj[i.cs1.getId()].push_back(i.cs2.getId());
+		adj[i.cs1.id].push_back(i.cs2.id);
 	}
-
-	vector<int> sortedOrder = topologicalSort(V, adj);
-
-	cout << "=== DFS ===" << endl;
+	vector<int> sortedOrder = topologicalSortKahn(V, adj);
+	if (sortedOrder.size() != V) {
+		cout << "The graph contains a cycle. Topological sorting is not possible." << endl;
+		return;
+	}
+	cout << "=== Kahn algorithm ===" << endl;
 	for (int node : sortedOrder) {
 		cout << node << " ";
 	}
 	cout << endl;
+	for (int node : sortedOrder) {
+		for (int node1 : adj[node]) {
+			cout << node << " -> " << node1 << endl;
+		}
+		cout << endl;
+	}
+	cout << endl;
 }
+
+
+
+
+
 
 
 
@@ -118,7 +141,6 @@ istream& operator >> (istream& in, gtn& s)
 			max = GetMax<Compressedstation, std::set>(s.Compressedstations);
 			cout << "Type id of compression station ";
 			Compressedstation& cs1 = Select<Compressedstation, std::set>(s.Compressedstations, max + 1);
-
 			max = GetMax<Compressedstation, std::set>(s.Compressedstations);
 			cout << "Type id of compression station ";
 			Compressedstation& cs2 = Select<Compressedstation, std::set>(s.Compressedstations, max + 1);
@@ -140,8 +162,8 @@ istream& operator >> (istream& in, gtn& s)
 					max = GetMax<Pipeline*, std::vector>(PipelineMask);
 					Pipeline* pl_ = Select<Pipeline*, std::vector>(PipelineMask, max + 1);
 					Pipeline& pl = *pl_;
-					pl.cs1 = cs1.getId();
-					pl.cs2 = cs2.getId();
+					pl.cs1 = cs1.id;
+					pl.cs2 = cs2.id;
 					pl.InGTN = true;
 					Connection cn(cs1, pl, cs2);
 					s.Connections.push_back(cn);

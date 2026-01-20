@@ -20,6 +20,9 @@
 class Mainthread
 {
 private:
+	void EditPipeline(Pipeline& s, int num);
+
+	void EditCompressedstation(Compressedstation& s, int num);
 
 	Pipeline LoadPipeline(std::ifstream& fin);
 	Compressedstation LoadCompressedstation(std::ifstream& fin);
@@ -45,9 +48,13 @@ public:
 
 
 
+template<typename ObjectType, typename ParamType>
+using Filter = bool(*)(const ObjectType&, ParamType);
+
+
 template<typename T>
 bool CheckByName(const T& obj, const std::string& param) {
-	return obj.getName() == param;
+	return obj.name == param;
 }
 
 template<typename T>
@@ -57,12 +64,12 @@ bool CheckByRepair(const T& obj, const int& param) {
 
 template<typename T>
 bool CheckByDiametr(const T& obj, const int& param) {
-	return obj.getDiameter() == param;
+	return obj.diameter == param;
 }
 
 template<typename T>
 bool CheckByPercentage(const T& obj, const int& param) {
-	double coefficient = static_cast<double>(obj.getLengthOfStableWorkshop()) / obj.getLengthOfWorkshop();
+	double coefficient = static_cast<double>(obj.LengthOfStableWorkshop) / obj.LengthOfWorkshop;
 	coefficient = std::isnan(coefficient) ? 0.0 : coefficient;
 	switch (param)
 	{
@@ -117,10 +124,10 @@ T& Select(Container<T>& g, uint64_t criticalnum = 9999)
 	std::vector<uint64_t> allowed;
 	for (const T& i : g) {
 		if constexpr (std::is_pointer_v<T>) {
-			allowed.push_back(static_cast<uint64_t>(i->getId()));
+			allowed.push_back(static_cast<uint64_t>(i->id));
 		}
 		else {
-			allowed.push_back(static_cast<uint64_t>(i.getId()));
+			allowed.push_back(static_cast<uint64_t>(i.id));
 		}
 	}
 
@@ -143,13 +150,13 @@ T& Select(Container<T>& g, uint64_t criticalnum = 9999)
 	if constexpr (std::is_pointer_v<T>) {
 		it = std::find_if(g.begin(), g.end(),
 			[num](const T& station) {
-				return static_cast<uint64_t>(station->getId()) == num;
+				return static_cast<uint64_t>(station->id) == num;
 			});
 	}
 	else {
 		it = std::find_if(g.begin(), g.end(),
 			[num](const T& station) {
-				return static_cast<uint64_t>(station.getId()) == num;
+				return static_cast<uint64_t>(station.id) == num;
 			});
 	}
 
@@ -172,10 +179,10 @@ uint64_t GetMax(const Container<T>& g)
 	std::vector<uint64_t> allowed;
 	for (const T& i : g) {
 		if constexpr (std::is_pointer_v<T>) {
-			allowed.push_back(static_cast<uint64_t>(i->getId()));
+			allowed.push_back(static_cast<uint64_t>(i->id));
 		}
 		else {
-			allowed.push_back(static_cast<uint64_t>(i.getId()));
+			allowed.push_back(static_cast<uint64_t>(i.id));
 		}
 	}
 

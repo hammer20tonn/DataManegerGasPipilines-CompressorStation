@@ -23,8 +23,9 @@ struct Connection {
 class gtn
 {
 private:
-	void topologicalSortDFS(int u, std::vector<std::vector<int>>& adj, std::vector<bool>& visited, std::stack<int>& st);
-	std::vector<int> topologicalSort(int V, std::vector<std::vector<int>>&adj);
+	//void topologicalSortDFS(int u, std::vector<std::vector<int>>& adj, std::vector<bool>& visited, std::stack<int>& st);
+	std::vector<int> topologicalSortKahn(int V, std::vector<std::vector<int>>& adj);
+	//std::vector<int> topologicalSort(int V, std::vector<std::vector<int>>&adj);
 public:
 	int id;
 	static int MaxID;

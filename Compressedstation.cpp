@@ -1,7 +1,7 @@
 #include "Compressedstation.h"
 
 
-#include <fstream>
+
 
 #include "utils.h"
 using namespace std;
@@ -18,64 +18,9 @@ Compressedstation::Compressedstation()
 }
 
 
-void Compressedstation::SearchMaxId(std::set<Compressedstation>& s) {
-	if (!s.empty()) {
-		MaxID = (s.rbegin()->getId())+1;
-	}
+void Compressedstation::setMaxId(int maxid) {
+	MaxID = maxid;
 }
-
-
-
-
-string Compressedstation::getName() const {
-	return name;
-}
-int Compressedstation::getId() const {
-	return id;
-}
-int Compressedstation::getLengthOfWorkshop() const {
-	return LengthOfWorkshop;
-}
-int Compressedstation::getLengthOfStableWorkshop() const {
-	return LengthOfStableWorkshop;
-}
-int Compressedstation::getClassStation() const {
-	return ClassStation;
-}
-
-void Compressedstation::load(ifstream& fin) {
-	fin.ignore(numeric_limits<streamsize>::max(), '\n');
-	getline(fin, name);
-	fin >> LengthOfWorkshop;
-	fin >> LengthOfStableWorkshop;
-	fin >> ClassStation;
-}
-
-void Compressedstation::save(ofstream& fout) const {
-	fout << name << endl << LengthOfWorkshop << endl << LengthOfStableWorkshop << endl << ClassStation << endl;
-}
-
-void Compressedstation::editLengthOfStableWorkshop(int command) {
-	if ((LengthOfStableWorkshop + 1 > LengthOfWorkshop && command == 1) || (LengthOfStableWorkshop - 1 < 0 && command == 0)) {
-		cerr << "The number of operating workshops exceeds the total number." << endl;
-		return;
-	}
-	if (command == 0) {
-		LengthOfStableWorkshop -= 1;
-	}
-	else if (command == 1) {
-		LengthOfStableWorkshop += 1;
-	}
-	else {
-		cerr << "System error" << endl;
-	}
-}
-
-
-
-
-
-
 
 
 

@@ -28,13 +28,13 @@ Mainthread::Mainthread() : Pipelines(), Compressedstations(), my_gtn(Pipelines, 
 {
 }
 
-/**
+
 
 void Mainthread::EditPipeline(Pipeline& s, int num)
 {
 	s.repair = num;
 }
-**/
+
 
 
 
@@ -105,8 +105,7 @@ void Mainthread::PipelineMenu()
 			command = GetCorrectNumber(0, 1);
 			try {
 				Pipeline& pl = Select<Pipeline, std::set>(Pipelines);
-				//EditPipeline(pl, command); // Edit
-				pl.repair = command;
+				EditPipeline(pl, command); // Edit
 			}
 			catch (const std::runtime_error& e) {
 				cout << e.what() << endl;
@@ -197,6 +196,18 @@ void Mainthread::PipelineMenu()
 
 
 
+void Mainthread::EditCompressedstation(Compressedstation& s, int num)
+{
+	int LengthOfStableWorkshop = s.LengthOfStableWorkshop;
+	if (LengthOfStableWorkshop + 1 > s.LengthOfWorkshop || LengthOfStableWorkshop - 1 < 0) {
+		cout << "The number of operating workshops exceeds the total number." << endl;
+		return;
+	}
+	s.LengthOfStableWorkshop += (num == 1) ? 1 : -1;
+}
+
+
+
 
 
 
@@ -212,24 +223,22 @@ void Mainthread::editCompressedstation(vector<reference_wrapper<Compressedstatio
 	if (num == 2) {
 		return;
 	} else if (num == 3) {
-		set<int> id_used_cs;
-		for (Connection& i : my_gtn.Connections) {
-			id_used_cs.insert(i.cs1.getId());
-			id_used_cs.insert(i.cs2.getId());
-		}
-		for (size_t i = 0; i < CompressedstationMask.size(); ++i) {
-			const Compressedstation& station = CompressedstationMask[i].get();
-			if (id_used_cs.count(station.getId()) == 0) {
-				Compressedstations.erase(station);
+		set<Compressedstation> Compressedstations_new;
+		int i = 0;
+		for (const Compressedstation cs : Compressedstations) {
+			if (cs.id != CompressedstationMask[i].get().id) {
+				Compressedstations_new.insert(cs);
 			}
-			else {
-				cout << station.getId() << " - This station is part of the gas transmission network. Removal is impossible." << endl;
+			i++;
+			if (i >= CompressedstationMask.size()) {
+				break;
 			}
 		}
+		Compressedstations = Compressedstations_new;
 		return;
 	}
 	for (auto& ref : CompressedstationMask) {
-		ref.get().editLengthOfStableWorkshop(num);
+		EditCompressedstation(ref, num);
 	}
 }
 
@@ -245,24 +254,22 @@ void Mainthread::editPipeline(vector<reference_wrapper<Pipeline>>& PipelineMask)
 		return;
 	}
 	else if (num == 3) {
-		set<int> id_used_pl;
-		for (Connection& i : my_gtn.Connections) {
-			id_used_pl.insert(i.pl.getId());
-		}
-		for (size_t i = 0; i < PipelineMask.size(); ++i) {
-			const Pipeline& pl = PipelineMask[i].get();
-			if (id_used_pl.count(pl.getId()) == 0) {
-				Pipelines.erase(pl);
+		set<Pipeline> Pipelines_new;
+		int i = 0;
+		for (const Pipeline pl : Pipelines) {
+			if (pl.id != PipelineMask[i].get().id) {
+				Pipelines_new.insert(pl);
 			}
-			else {
-				cout << pl.getId() << " - This pipeline is part of the gas transmission network. Removal is impossible." << endl;
+			i++;
+			if (i >= PipelineMask.size()) {
+				break;
 			}
 		}
+		Pipelines = Pipelines_new;
 		return;
 	}
 	for (auto& ref : PipelineMask) {
-		//EditPipeline(ref, num);
-		ref.get().repair = num;
+		EditPipeline(ref, num);
 	}
 }
 
@@ -298,16 +305,11 @@ void Mainthread::CompressedstationMenu()
 			break;
 		}
 		case 2: {
-			if (Compressedstations.empty()) {
-				cerr << "Compressor stations not found." << endl;
-				break;
-			}
 			cout << "['+1' - 1, '-1' - 0]: ";
 			command = GetCorrectNumber(0, 1);
 			try {
 				Compressedstation& cs = Select<Compressedstation, std::set>(Compressedstations);
-				//EditCompressedstation(cs, command); // Edit
-				cs.editLengthOfStableWorkshop(command);
+				EditCompressedstation(cs, command); // Edit
 			}
 			catch (const std::runtime_error& e) {
 				cerr << e.what() << endl;
@@ -315,20 +317,12 @@ void Mainthread::CompressedstationMenu()
 			break;
 		}
 		case 3: {
-			if (Compressedstations.empty()) {
-				cerr << "Compressor stations not found." << endl;
-				break;
-			}
 			// Print
 			for (auto& st : Compressedstations)
 				cout << st << endl;
 			break;
 		}
 		case 4: {
-			if (Compressedstations.empty()) {
-				cerr << "Compressor stations not found." << endl;
-				break;
-			}
 			CompressedstationMask.clear();
 			string name = "Unknown";
 			cout << "Type name: ";
@@ -348,10 +342,6 @@ void Mainthread::CompressedstationMenu()
 			break;
 		}
 		case 5: {
-			if (Compressedstations.empty()) {
-				cerr << "Compressor stations not found." << endl;
-				break;
-			}
 			CompressedstationMask.clear();
 			cout << "1. 100 - 80" << endl
 				<< "2. 79 - 59" << endl
@@ -414,29 +404,41 @@ void Mainthread::CompressedstationMenu()
 Pipeline Mainthread::LoadPipeline(ifstream& fin)
 {
 	Pipeline s;
-	s.load(fin);
+	fin.ignore(numeric_limits<streamsize>::max(), '\n');
+	getline(fin, s.name);
+	fin >> s.length;
+	fin >> s.diameter;
+	fin >> s.repair;
+	fin >> s.cs1;
+	fin >> s.cs2;
+	fin >> s.InGTN;
+	fin >> s.id;
 	return s;
 }
 
 Compressedstation Mainthread::LoadCompressedstation(ifstream& fin)
 {
 	Compressedstation s;
-	s.load(fin);
+	fin.ignore(numeric_limits<streamsize>::max(), '\n');
+	getline(fin, s.name);
+	fin >> s.LengthOfWorkshop;
+	fin >> s.LengthOfStableWorkshop;
+	fin >> s.ClassStation;
+	fin >> s.id;
 	return s;
 }
 
 
-
-
 void Mainthread::SavePipeline(ofstream& fout, const Pipeline& s)
 {
-	s.save(fout);
+	fout << s.name << endl << s.length << endl << s.diameter << endl << s.repair << endl << s.cs1 << endl << s.cs2 << endl << s.InGTN << endl << s.id << endl;
 }
 
 void Mainthread::SaveCompressedstation(ofstream& fout, const Compressedstation& s)
 {
-	s.save(fout);
+	fout << s.name << endl << s.LengthOfWorkshop << endl << s.LengthOfStableWorkshop << endl << s.ClassStation << endl << s.id << endl;
 }
+
 
 
 
@@ -502,27 +504,25 @@ void Mainthread::loadFunction() {
 	else {
 		cerr << "The file cannot be opened." << endl;
 	}
-	Pipeline::SearchMaxId(Pipelines);
-	Compressedstation::SearchMaxId(Compressedstations);
-	/**int MaxIdPipelines;
+	int MaxIdPipelines;
 	int MaxIdCompressedstations;
 	if (!Pipelines.empty()) {
-		MaxIdPipelines = Pipelines.rbegin()->getId();
-		//Pipeline::setMaxId(MaxIdPipelines+1);
+		MaxIdPipelines = Pipelines.rbegin()->id;
+		Pipeline::setMaxId(MaxIdPipelines+1);
 	}
 	if (!Compressedstations.empty()) {
-		MaxIdCompressedstations = Compressedstations.rbegin()->getId();
-		//Compressedstation::setMaxId(MaxIdCompressedstations + 1);
-	}**/
+		MaxIdCompressedstations = Compressedstations.rbegin()->id;
+		Compressedstation::setMaxId(MaxIdCompressedstations + 1);
+	}
 	for (const Pipeline& i_ : Pipelines) {
 		if (i_.InGTN) {
 			Compressedstation* foundCs1 = nullptr;
 			Compressedstation* foundCs2 = nullptr;
 			for (const Compressedstation& i : Compressedstations) {
-				if (i.getId() == i_.cs1) {
+				if (i.id == i_.cs1) {
 					foundCs1 = const_cast<Compressedstation*>(&i);
 				}
-				if (i.getId() == i_.cs2) {
+				if (i.id == i_.cs2) {
 					foundCs2 = const_cast<Compressedstation*>(&i);
 				}
 				if (foundCs1 && foundCs2) {
